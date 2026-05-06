@@ -14,7 +14,12 @@ except ImportError:
 from fastapi.middleware.cors import CORSMiddleware
 import os
 
-app = FastAPI(title="Meal Plan Generator API")
+app = FastAPI(
+                title="Meal Plan Generator API",
+                docs_url=None,
+                redoc_url=None,
+                openapi_url=None
+)
 
 app.add_middleware(
     CORSMiddleware,
