@@ -2,9 +2,15 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import StreamingResponse
 import pandas as pd
 
-from schemas import MealRequest
-from GA import GAProblem, GASearch
-from pdf_generator import create_pdf_in_memory
+try:
+    from app.schemas import MealRequest
+    from app.GA import GAProblem, GASearch
+    from app.pdf_generator import create_pdf_in_memory
+except ImportError:
+    from schemas import MealRequest
+    from GA import GAProblem, GASearch
+    from pdf_generator import create_pdf_in_memory
+
 from fastapi.middleware.cors import CORSMiddleware
 import os
 
