@@ -18,7 +18,7 @@ app = FastAPI(title="Meal Plan Generator API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "https://nutri-mlih.vercel.app/"],  # Allows your Next.js app
+    allow_origins=["http://localhost:3000", "https://nutri-mlih.vercel.app"],  # Allows your Next.js app
     allow_credentials=True,
     allow_methods=["*"],  # Allows all methods (POST, GET, etc.)
     allow_headers=["*"],  # Allows all headers
