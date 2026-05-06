@@ -57,7 +57,7 @@ def diversity_penalty_per_week(state):
 
 class GAProblem:
     def __init__(self, recipes_df, total_price, tdee, nutri_preference_str="maintain"):
-        self.size = 90 # we did not use this at all occurance = 1
+        self.size = 90
         self.total_price = total_price
         self.tdee = tdee
         self.transitionmodel = Gettransitionmodel(recipes_df)
@@ -69,29 +69,26 @@ class GAProblem:
      
     def get_total_cost(self, state):
         total_cost = 0
-        for i in range(len(state)):
-           breakfast_cost =  self.transitionmodel["Breakfast"][state[i][0]][1]
-           lunch_cost = self.transitionmodel["Lunch"][state[i][1]][1]
-           dinner_cost  = self.transitionmodel["Dinner"][state[i][2]][1]
-           day_cost = breakfast_cost+lunch_cost+dinner_cost
-           total_cost += day_cost
+        model = self.transitionmodel
+        for day in state:
+           total_cost += (
+               model["Breakfast"][day[0]][1] +
+               model["Lunch"][day[1]][1] +
+               model["Dinner"][day[2]][1]
+           )
         return total_cost
     
     
     def get_total_cal(self,state):
-        day_calories = []
+        total_cal = 0
+        model = self.transitionmodel
         for day in state:
-            day_cal = (
-            self.transitionmodel["Breakfast"][day[0]][2] +
-            self.transitionmodel["Lunch"][day[1]][2] +
-            self.transitionmodel["Dinner"][day[2]][2]
-        )
-            if day_cal > self.tdee * 1.1 or day_cal < self.tdee * 0.9:
-                print(day_cal)
-                print("Out of calories range")
-            day_calories.append(day_cal)
-        
-        return sum(day_calories)
+            total_cal += (
+                model["Breakfast"][day[0]][2] +
+                model["Lunch"][day[1]][2] +
+                model["Dinner"][day[2]][2]
+            )
+        return total_cal
     
 
     def _macro_penalty_for_day(self, day):
