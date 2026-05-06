@@ -1,0 +1,12 @@
+[project]
+name = "nutri-mlih-backend"
+version = "1.0.0"
+description = "NutriMlih FastAPI backend"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi[standard]>=0.136.1",
+    "pandas>=3.0.2",
+    "pydantic>=2.13.4",
+    "reportlab>=4.5.0",
+]

@@ -5,12 +5,21 @@ import pandas as pd
 from schemas import MealRequest
 from GA import GAProblem, GASearch
 from pdf_generator import create_pdf_in_memory
+from fastapi.middleware.cors import CORSMiddleware
+import os
 
 app = FastAPI(title="Meal Plan Generator API")
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000", "https://nutri-mlih.vercel.app/"],  # Allows your Next.js app
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods (POST, GET, etc.)
+    allow_headers=["*"],  # Allows all headers
+)
 
-# Load dataset once (IMPORTANT: not inside endpoint)
-recipes_df = pd.read_csv("recipes.csv")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+recipes_df = pd.read_csv(os.path.join(BASE_DIR, "recipes.csv"))
 
 
 @app.post("/generate-meal-plan")
