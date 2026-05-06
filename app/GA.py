@@ -92,9 +92,10 @@ class GAProblem:
     
 
     def _macro_penalty_for_day(self, day):
-        actual_protein =  self.transitionmodel["Breakfast"][day[0]][3] +  self.transitionmodel["Dinner"][day[2]][3] +  self.transitionmodel["Lunch"][day[1]][3]
-        actual_carbs   = self.transitionmodel["Breakfast"][day[0]][4] +  self.transitionmodel["Dinner"][day[2]][4] +  self.transitionmodel["Lunch"][day[1]][4]
-        actual_fat   = self.transitionmodel["Breakfast"][day[0]][5] +  self.transitionmodel["Dinner"][day[2]][5] +  self.transitionmodel["Lunch"][day[1]][5]  
+        model = self.transitionmodel
+        actual_protein =  model["Breakfast"][day[0]][3] +  model["Dinner"][day[2]][3] +  model["Lunch"][day[1]][3]
+        actual_carbs   = model["Breakfast"][day[0]][4] +  model["Dinner"][day[2]][4] +  model["Lunch"][day[1]][4]
+        actual_fat   = model["Breakfast"][day[0]][5] +  model["Dinner"][day[2]][5] +  model["Lunch"][day[1]][5]  
         protein_dev = abs(actual_protein - self.target_protein_g) / self.target_protein_g
         fat_dev     = abs(actual_fat     - self.target_fat_g)     / self.target_fat_g
         carbs_dev   = abs(actual_carbs   - self.target_carbs_g)   / self.target_carbs_g
@@ -165,14 +166,14 @@ def crossover_and_mutation(population,problem):
 def GASearch(problem):
     # step 1 Selection:
     list_of_states = []
-    for _ in range(100):
+    for _ in range(80):
         state = problem.generate_random_state()
         fitness = problem.fitness_function(state)
         list_of_states.append((state,fitness))
-    population = sorted(list_of_states, key=lambda x: x[1], reverse=True)[:25]
+    population = sorted(list_of_states, key=lambda x: x[1], reverse=True)[:20]
     # step 2 and 3 crossover and mutation
-    for _ in range(250):
-        population = sorted(population, key=lambda x: x[1], reverse=True)[:25]
+    for _ in range(200):
+        population = sorted(population, key=lambda x: x[1], reverse=True)[:20]
         for state, fitness in population:
             if fitness == 0:
                 return (state, fitness)
