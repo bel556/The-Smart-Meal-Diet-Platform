@@ -93,30 +93,35 @@ class GAProblem:
 
     def _macro_penalty_for_day(self, day):
         model = self.transitionmodel
+        target_carbs = self.target_carbs_g
+        target_fat = self.target_fat_g
+        target_protein = self.target_protein_g
         actual_protein =  model["Breakfast"][day[0]][3] +  model["Dinner"][day[2]][3] +  model["Lunch"][day[1]][3]
         actual_carbs   = model["Breakfast"][day[0]][4] +  model["Dinner"][day[2]][4] +  model["Lunch"][day[1]][4]
         actual_fat   = model["Breakfast"][day[0]][5] +  model["Dinner"][day[2]][5] +  model["Lunch"][day[1]][5]  
-        protein_dev = abs(actual_protein - self.target_protein_g) / self.target_protein_g
-        fat_dev     = abs(actual_fat     - self.target_fat_g)     / self.target_fat_g
-        carbs_dev   = abs(actual_carbs   - self.target_carbs_g)   / self.target_carbs_g
+        protein_dev = abs(actual_protein - target_protein) / target_protein
+        fat_dev     = abs(actual_fat     - target_fat)     / target_fat
+        carbs_dev   = abs(actual_carbs   - target_carbs)   / target_carbs
         return (protein_dev + fat_dev + carbs_dev) / 3
     
 
     def fitness_function(self, state):
         total_cost = self.get_total_cost(state)
-        cost_penalty = 1 if (self.total_price - total_cost) / (self.total_price) < 0 else (self.total_price - total_cost) / (self.total_price)
-        lower_bound = 0.9 * self.tdee
-        upper_bound = 1.1 * self.tdee
-
+        total_price = self.total_price
+        cost_penalty = 1 if (total_price - total_cost) / (total_price) < 0 else (total_price - total_cost) / (total_price)
+        tdee = self.tdee
+        lower_bound = 0.9 * tdee
+        upper_bound = 1.1 * tdee
+        model = self.transitionmodel
         bad_days = 0
         total_macro_dev=0
         for day in state:
             day_calories = (
-                self.transitionmodel["Breakfast"][day[0]][2] +
-                self.transitionmodel["Lunch"][day[1]][2] +
-                self.transitionmodel["Dinner"][day[2]][2]
+                model["Breakfast"][day[0]][2] +
+                model["Lunch"][day[1]][2] +
+                model["Dinner"][day[2]][2]
             )
-            if day_calories != self.tdee:
+            if day_calories != tdee:
                 bad_days += 0.001
             if day_calories < lower_bound or day_calories > upper_bound:
                 bad_days += 1
@@ -126,24 +131,25 @@ class GAProblem:
         diversity_penalty = diversity_penalty_per_week(state)
         fitness = -(
             0.3 * cost_penalty +
-            0.2* nutrition_penalty +
-            0.15 * diversity_penalty +
-            0.35* macro_penalty
+            0.3* nutrition_penalty +
+            0.1 * diversity_penalty +
+            0.3* macro_penalty
         )
         return fitness
     
     
     def generate_random_state(self):
-         breakfast_list = list(self.transitionmodel['Breakfast'].keys())
-         lunch_list = list(self.transitionmodel['Lunch'].keys())
-         dinner_list = list(self.transitionmodel['Dinner'].keys())
-         return [(random.choice(breakfast_list),
+        model = self.transitionmodel
+        breakfast_list = list(model['Breakfast'].keys())
+        lunch_list = list(model['Lunch'].keys())
+        dinner_list = list(model['Dinner'].keys())
+        return [(random.choice(breakfast_list),
                   random.choice(lunch_list),
                   random.choice(dinner_list))
                     for _ in range(30)]
 def crossover_and_mutation(population,problem):
        childs = []
-     
+       model = problem.transitionmodel
        for i in range(len(population)):
          for j in range(i+1,len(population)):
             cutoff = random.randrange(1,29)
@@ -151,8 +157,8 @@ def crossover_and_mutation(population,problem):
             parent_b = population[j][0]
             child_a = parent_a[:cutoff] + parent_b[cutoff:]
             child_b = parent_b[:cutoff] + parent_a[cutoff:]
-            random_lunch_a = random.choice(list(problem.transitionmodel['Lunch'].keys()))
-            random_lunch_b = random.choice(list(problem.transitionmodel['Lunch'].keys()))
+            random_lunch_a = random.choice(list(model['Lunch'].keys()))
+            random_lunch_b = random.choice(list(model['Lunch'].keys()))
             random_pos_a  = random.randrange(30)
             random_pos_b  = random.randrange(30)
             t1 =   [child_a[random_pos_a][0],random_lunch_a, child_a[random_pos_a][2]]
@@ -172,10 +178,10 @@ def GASearch(problem):
         list_of_states.append((state,fitness))
     population = sorted(list_of_states, key=lambda x: x[1], reverse=True)[:20]
     # step 2 and 3 crossover and mutation
-    for _ in range(200):
+    for _ in range(250):
         population = sorted(population, key=lambda x: x[1], reverse=True)[:20]
         for state, fitness in population:
-            if fitness == 0:
+            if fitness > -0.015:
                 return (state, fitness)
         population =  crossover_and_mutation(population,problem)
     best_candidate = sorted(population, key=lambda x: x[1], reverse=True)[:1]
