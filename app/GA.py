@@ -108,7 +108,7 @@ class GAProblem:
     def fitness_function(self, state):
         total_cost = self.get_total_cost(state)
         total_price = self.total_price
-        cost_penalty = 1 if (total_price - total_cost) / (total_price) < 0 else (total_price - total_cost) / (total_price)
+        cost_penalty = 0.5 + min((total_cost - total_price) / (total_cost), 0.5) if (total_price - total_cost) / (total_price) < 0 else (total_price - total_cost) / (total_price)
         tdee = self.tdee
         lower_bound = 0.9 * tdee
         upper_bound = 1.1 * tdee
@@ -178,7 +178,7 @@ def GASearch(problem):
         list_of_states.append((state,fitness))
     population = sorted(list_of_states, key=lambda x: x[1], reverse=True)[:20]
     # step 2 and 3 crossover and mutation
-    for _ in range(250):
+    for _ in range(200):
         population = sorted(population, key=lambda x: x[1], reverse=True)[:20]
         for state, fitness in population:
             if fitness > -0.015:
