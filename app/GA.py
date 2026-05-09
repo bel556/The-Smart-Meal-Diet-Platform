@@ -121,10 +121,10 @@ class GAProblem:
                 model["Lunch"][day[1]][2] +
                 model["Dinner"][day[2]][2]
             )
-            if day_calories != tdee:
-                bad_days += 0.001
             if day_calories < lower_bound or day_calories > upper_bound:
-                bad_days += 1
+                bad_days += 0.8 + min(0.2, abs(tdee - day_calories) / tdee)
+            else:
+                bad_days += abs(tdee - day_calories) / tdee
             total_macro_dev += self._macro_penalty_for_day(day)
         nutrition_penalty = bad_days / len(state)
         macro_penalty     = total_macro_dev / len(state)
